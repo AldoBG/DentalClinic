@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+.angular/
+
+# Tool caches
+.cache/
+
+# Generated UI screenshots
+backend/ui_*.png
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment files (secrets/config)
+.env
+
+# AI tool local state
+.cursor/
+.claude/
+.devin/
+.agents/
+backend/.agents/

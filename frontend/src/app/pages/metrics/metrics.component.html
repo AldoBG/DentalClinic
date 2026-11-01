@@ -1,0 +1,46 @@
+<div class="w-full space-y-6">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+    <div>
+      <span class="text-xs font-bold uppercase tracking-wider text-cyan-700">Impacto Operativo</span>
+      <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-0.5">Métricas de Inasistencia y Continuidad</h2>
+      <p class="text-sm text-slate-600 mt-1">Meta del consultorio: reducir el 30% histórico de inasistencias por debajo del 10% y evitar tratamientos abandonados.</p>
+    </div>
+    <button (click)="calculateMetrics()" class="btn-secondary">
+      <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+      </svg>
+      <span>Recalcular Indicadores</span>
+    </button>
+  </div>
+
+  <div *ngIf="isLoading" class="data-card p-16 flex flex-col items-center justify-center gap-3">
+    <div class="animate-spin rounded-full h-8 w-8 border-2 border-slate-200 border-t-cyan-600"></div>
+    <p class="text-sm font-bold text-slate-600">Calculando indicadores del consultorio...</p>
+  </div>
+
+  <div *ngIf="!isLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+    <div class="data-card p-6">
+      <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Tasa de Inasistencia (No-Show)</p>
+      <p class="text-4xl font-bold text-red-600 mt-2">{{ stats.noShowRate }}%</p>
+      <p class="text-xs text-slate-600 font-bold mt-2">{{ stats.noShowsCount }} inasistencias de {{ stats.totalAppointments }} citas</p>
+    </div>
+
+    <div class="data-card p-6">
+      <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Efectividad de Confirmación</p>
+      <p class="text-4xl font-bold text-emerald-600 mt-2">{{ stats.confirmationRate }}%</p>
+      <p class="text-xs text-slate-600 font-bold mt-2">{{ stats.confirmedCount }} citas confirmadas o completadas</p>
+    </div>
+
+    <div class="data-card p-6">
+      <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Tratamientos Multisesión Activos</p>
+      <p class="text-4xl font-bold text-cyan-700 mt-2">{{ stats.activeTreatmentsCount }}</p>
+      <p class="text-xs text-slate-600 font-bold mt-2">Endodoncias, coronas y ortodoncia en curso</p>
+    </div>
+
+    <div class="data-card p-6">
+      <p class="text-xs font-bold uppercase tracking-wider text-amber-800">Riesgo de Abandono (Sin Cita)</p>
+      <p class="text-4xl font-bold text-amber-600 mt-2">{{ stats.atRiskTreatmentsCount }}</p>
+      <p class="text-xs text-slate-600 font-bold mt-2">Pacientes con sesiones pendientes sin agendar</p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,105 @@
+<div class="w-full space-y-6">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+    <div>
+      <span class="text-xs font-bold uppercase tracking-wider text-cyan-700">Directorio Operativo</span>
+      <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-0.5">Pacientes y Estado de Seguimiento</h2>
+      <p class="text-sm text-slate-600 mt-1">Consulta rápida de teléfonos de contacto, tratamientos multisesión activos y próximas citas.</p>
+    </div>
+    <button (click)="loadPatients()" class="btn-secondary">
+      <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+      </svg>
+      <span>Actualizar Lista</span>
+    </button>
+  </div>
+
+  <div *ngIf="feedbackMsg" role="status" class="bg-emerald-900 text-white px-4 py-3 rounded-xl text-sm font-bold flex items-center gap-2">
+    <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+    </svg>
+    <span>{{ feedbackMsg }}</span>
+  </div>
+
+  <div class="data-card p-6">
+    <h3 class="text-xs font-bold text-slate-600 uppercase tracking-wider mb-4">Registrar Nuevo Paciente para Seguimiento</h3>
+    <form (ngSubmit)="createPatient()" class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+      <div class="md:col-span-5">
+        <label for="patientName" class="block text-xs font-bold text-slate-700 mb-1.5">Nombre y Apellido</label>
+        <input id="patientName" [(ngModel)]="newPatient.name" name="name" type="text" required
+               class="w-full bg-white border border-slate-300 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-cyan-600 focus:border-cyan-600"
+               placeholder="Ej. Laura Méndez">
+      </div>
+      <div class="md:col-span-4">
+        <label for="patientPhone" class="block text-xs font-bold text-slate-700 mb-1.5">Teléfono WhatsApp (con código de país)</label>
+        <input id="patientPhone" [(ngModel)]="newPatient.phone" name="phone" type="text" required
+               class="w-full bg-white border border-slate-300 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-cyan-600 focus:border-cyan-600"
+               placeholder="Ej. 5491145678901">
+      </div>
+      <div class="md:col-span-3">
+        <button type="submit" class="btn-primary w-full py-2.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+          </svg>
+          <span>Agregar Paciente</span>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div *ngIf="isLoading" class="data-card p-16 flex flex-col items-center justify-center gap-3">
+    <div class="animate-spin rounded-full h-8 w-8 border-2 border-slate-200 border-t-cyan-600"></div>
+    <p class="text-sm font-bold text-slate-600">Cargando directorio de pacientes...</p>
+  </div>
+
+  <div *ngIf="!isLoading" class="data-card overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead class="bg-slate-100 border-b border-slate-200">
+          <tr class="text-slate-600 text-xs font-bold uppercase tracking-wider">
+            <th class="px-6 py-3.5">Paciente</th>
+            <th class="px-6 py-3.5">WhatsApp</th>
+            <th class="px-6 py-3.5">Tratamiento Activo</th>
+            <th class="px-6 py-3.5">Estado de Continuidad</th>
+            <th class="px-6 py-3.5 text-right">Contacto Directo</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-200 text-sm">
+          <tr *ngFor="let p of patients" class="hover:bg-slate-50 transition-colors">
+            <td class="px-6 py-4 font-bold text-slate-900">{{ p.name }}</td>
+            <td class="px-6 py-4 text-slate-600 font-medium">+{{ p.phone }}</td>
+            <td class="px-6 py-4">
+              <ng-container *ngIf="getActiveTreatment(p) as tr; else noTr">
+                <span class="font-bold text-slate-800">{{ tr.treatmentType?.name }}</span>
+                <span class="ml-2 text-xs font-bold px-2 py-0.5 rounded bg-cyan-50 text-cyan-800 border border-cyan-200">
+                  Sesión {{ tr.currentSession }}/{{ tr.treatmentType?.totalSessions }}
+                </span>
+              </ng-container>
+              <ng-template #noTr>
+                <span class="text-slate-400 text-xs font-bold">Consulta General / Sin plan multisesión</span>
+              </ng-template>
+            </td>
+            <td class="px-6 py-4">
+              <span *ngIf="hasFutureAppointment(p)" class="badge-pill bg-emerald-50 text-emerald-800 border border-emerald-200">
+                Próxima Cita Agendada
+              </span>
+              <span *ngIf="!hasFutureAppointment(p) && getActiveTreatment(p)" class="badge-pill bg-amber-50 text-amber-800 border border-amber-300">
+                Requiere Agendar Sesión
+              </span>
+              <span *ngIf="!hasFutureAppointment(p) && !getActiveTreatment(p)" class="badge-pill bg-slate-100 text-slate-600 border border-slate-200">
+                Sin Cita Pendiente
+              </span>
+            </td>
+            <td class="px-6 py-4 text-right">
+              <a [href]="'https://wa.me/' + p.phone" target="_blank" rel="noopener" class="btn-secondary py-1.5 px-3 text-xs">
+                <span>Abrir WhatsApp</span>
+              </a>
+            </td>
+          </tr>
+          <tr *ngIf="patients.length === 0">
+            <td colspan="5" class="px-6 py-12 text-center text-slate-500">No hay pacientes registrados.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

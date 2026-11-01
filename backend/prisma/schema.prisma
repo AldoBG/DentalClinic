@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Patient {
+  id                String            @id @default(uuid())
+  name              String
+  phone             String            @unique
+  appointments      Appointment[]
+  patientTreatments PatientTreatment[]
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+}
+
+model TreatmentType {
+  id            String            @id @default(uuid())
+  name          String            @unique // e.g., "Endodoncia", "Ortodoncia"
+  totalSessions Int
+  patientTreatments PatientTreatment[]
+}
+
+model PatientTreatment {
+  id              String          @id @default(uuid())
+  patientId       String
+  patient         Patient         @relation(fields: [patientId], references: [id])
+  treatmentTypeId String
+  treatmentType   TreatmentType   @relation(fields: [treatmentTypeId], references: [id])
+  currentSession  Int             @default(0)
+  status          String          @default("ACTIVE") // ACTIVE, COMPLETED, ABANDONED
+  appointments    Appointment[]
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+model Appointment {
+  id                 String            @id @default(uuid())
+  patientId          String
+  patient            Patient           @relation(fields: [patientId], references: [id])
+  date               DateTime
+  status             String            @default("PENDING") // PENDING, CONFIRMED, etc.
+  googleEventId      String?           @unique
+  patientTreatmentId String?
+  patientTreatment   PatientTreatment? @relation(fields: [patientTreatmentId], references: [id])
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+}

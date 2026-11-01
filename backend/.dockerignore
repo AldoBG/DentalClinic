@@ -1,0 +1,21 @@
+# Dependencies and generated output (rebuilt inside the image)
+node_modules/
+dist/
+.cache/
+
+# AI tool local state
+.cursor/
+.claude/
+.devin/
+.agents/
+.agents
+.skills
+
+# Local dev SQLite database: never ship dev data/binary
+prisma/dev.db
+
+# Dev-only UI screenshots
+ui_*.png
+
+# Logs
+*.log
