@@ -28,3 +28,6 @@ npm-debug.log*
 .devin/
 .agents/
 backend/.agents/
+
+# Vercel link state
+.vercel/
