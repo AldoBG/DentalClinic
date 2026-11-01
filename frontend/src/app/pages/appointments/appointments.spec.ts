@@ -43,4 +43,33 @@ describe('Appointments', () => {
     ];
     expect(component.attendanceRate).toBe('—');
   });
+
+  it('treatment select is preloaded with at least 3 options before choosing a patient (S6)', () => {
+    component.patients = [{ id: 'p1', name: 'Laura', createdAt: '2026-11-01T00:00:00Z' }];
+    component.treatmentTypes = [
+      { id: 't1', name: 'Endodoncia Molar' },
+      { id: 't2', name: 'Ortodoncia Correctiva' },
+      { id: 't3', name: 'Rehabilitación Corona' }
+    ];
+    component.patientTreatments = [];
+    component.form = { patientId: '', date: '', treatment: '' };
+    expect(component.treatmentOptions.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it('a patient with an active treatment still sees at least 3 options: own + catalog supplement (S6)', () => {
+    component.patients = [{ id: 'p1', name: 'Laura', createdAt: '2026-11-01T00:00:00Z' }];
+    component.treatmentTypes = [
+      { id: 't1', name: 'Endodoncia Molar' },
+      { id: 't2', name: 'Ortodoncia Correctiva' },
+      { id: 't3', name: 'Rehabilitación Corona' }
+    ];
+    component.patientTreatments = [
+      { id: 'pt1', patientId: 'p1', status: 'ACTIVE', currentSession: 2, treatmentType: { id: 't1', name: 'Endodoncia Molar', totalSessions: 5 } }
+    ];
+    component.form = { patientId: 'p1', date: '', treatment: '' };
+    const options = component.treatmentOptions;
+    expect(options.length).toBeGreaterThanOrEqual(3);
+    expect(options.some((o) => o.kind === 'patientTreatment')).toBe(true);
+    expect(options.filter((o) => o.kind === 'treatmentType')).toHaveLength(2);
+  });
 });

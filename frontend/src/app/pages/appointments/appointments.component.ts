@@ -88,32 +88,38 @@ export class AppointmentsComponent implements OnInit {
     });
   }
 
-  // Options for the treatment selector: the patient's own active treatments first,
-  // then the full catalog as "start new treatment" options when nothing exists.
+  // Options for the treatment selector (S6: never empty, at least 3 options).
+  // The patient's own active treatments come first, then catalog types the
+  // patient does not already have active, as "start new treatment" options.
+  // Before any patient is chosen, the full catalog is offered.
   get treatmentOptions(): TreatmentOption[] {
     const options: TreatmentOption[] = [];
     const selectedPatient = this.patients.find((p) => p.id === this.form.patientId);
 
+    const activeTypeIds = new Set<string>();
     if (selectedPatient) {
       const own = this.patientTreatments.filter(
         (pt) => pt.patientId === selectedPatient.id && pt.status === 'ACTIVE'
       );
       for (const pt of own) {
+        activeTypeIds.add(pt.treatmentType?.id ?? pt.treatmentTypeId ?? '');
         options.push({
           kind: 'patientTreatment',
           patientTreatmentId: pt.id,
           label: `${pt.treatmentType?.name} — sesión ${pt.currentSession} de ${pt.treatmentType?.totalSessions}`
         });
       }
-      if (own.length === 0) {
-        for (const type of this.treatmentTypes) {
-          options.push({
-            kind: 'treatmentType',
-            treatmentTypeId: type.id,
-            label: `Nuevo tratamiento: ${type.name}`
-          });
-        }
+    }
+
+    for (const type of this.treatmentTypes) {
+      if (selectedPatient && activeTypeIds.has(type.id)) {
+        continue; // already an own option, no need to relabel it
       }
+      options.push({
+        kind: 'treatmentType',
+        treatmentTypeId: type.id,
+        label: selectedPatient ? `Nuevo tratamiento: ${type.name}` : type.name
+      });
     }
     return options;
   }
