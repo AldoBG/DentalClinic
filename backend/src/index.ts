@@ -2,7 +2,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { PatientController, AppointmentController, TreatmentController, AttentionController } from './controllers/core.controller';
+import { PatientController, AppointmentController, TreatmentController, TreatmentCatalogController, AttentionController } from './controllers/core.controller';
 
 dotenv.config();
 
@@ -32,6 +32,7 @@ app.patch('/api/appointments/:id', AppointmentController.updateStatus);
 
 app.get('/api/treatments', TreatmentController.getAll);
 app.patch('/api/treatments/:id', TreatmentController.updateProgress);
+app.get('/api/treatment-types', TreatmentCatalogController.getAll);
 
 app.get('/api/attention', AttentionController.getRequiredAttention);
 

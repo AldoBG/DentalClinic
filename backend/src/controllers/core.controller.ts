@@ -36,15 +36,56 @@ export const AppointmentController = {
     res.json(appointments);
   },
   async create(req: Request, res: Response) {
-    const { patientId, date, patientTreatmentId } = req.body;
+    const { patientId, date, treatmentTypeId, patientTreatmentId } = req.body;
+    const missing = [
+      !patientId && 'paciente',
+      !date && 'fecha/hora',
+      !treatmentTypeId && !patientTreatmentId && 'tratamiento'
+    ].filter(Boolean);
+    if (missing.length > 0) {
+      return res.status(400).json({ error: `Faltan datos requeridos para agendar: ${missing.join(', ')}` });
+    }
+    const patient = await prisma.patient.findUnique({ where: { id: patientId } });
+    if (!patient) {
+      return res.status(400).json({ error: 'Paciente no encontrado' });
+    }
+    const appointmentDate = new Date(date);
+    if (isNaN(appointmentDate.getTime())) {
+      return res.status(400).json({ error: 'Fecha/hora inválida' });
+    }
+    // The appointment cannot be scheduled before the day the patient was registered.
+    const registeredDayStart = new Date(
+      patient.createdAt.getFullYear(),
+      patient.createdAt.getMonth(),
+      patient.createdAt.getDate()
+    );
+    if (appointmentDate < registeredDayStart) {
+      return res.status(400).json({
+        error: `No se puede agendar con fecha anterior al día de alta del paciente (${patient.createdAt.toISOString().slice(0, 10)})`
+      });
+    }
+    let linkedTreatmentId = patientTreatmentId || null;
+    if (!linkedTreatmentId) {
+      const activeTreatment = await prisma.patientTreatment.findFirst({
+        where: { patientId, treatmentTypeId, status: 'ACTIVE' }
+      });
+      linkedTreatmentId = activeTreatment
+        ? activeTreatment.id
+        : (await prisma.patientTreatment.create({
+            data: { patientId, treatmentTypeId, status: 'ACTIVE' }
+          })).id;
+    }
     const appointment = await prisma.appointment.create({
       data: {
         patientId,
-        date: new Date(date),
-        status: 'CONFIRMED',
-        patientTreatmentId: patientTreatmentId || null
+        date: appointmentDate,
+        status: 'PENDING',
+        patientTreatmentId: linkedTreatmentId
       },
-      include: { patient: true }
+      include: {
+        patient: true,
+        patientTreatment: { include: { treatmentType: true } }
+      }
     });
     res.status(201).json(appointment);
   },
@@ -89,6 +130,13 @@ export const TreatmentController = {
       data: { currentSession, status }
     });
     res.json(treatment);
+  }
+};
+
+export const TreatmentCatalogController = {
+  async getAll(req: Request, res: Response) {
+    const treatmentTypes = await prisma.treatmentType.findMany();
+    res.json(treatmentTypes);
   }
 };
 
