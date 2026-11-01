@@ -58,41 +58,6 @@ describe('AttentionComponent (Orthodontics & Musical UX)', () => {
     fixture.detectChanges();
   });
 
-  it('should render the Orthodontics & Musical Cadence hero banner with equalizer and archwire SVG', () => {
-    const compiled = fixture.nativeElement as HTMLElement;
-    const cadenceBanner = compiled.querySelector('[data-testid="ortho-harmonic-banner"]');
-    expect(cadenceBanner).toBeTruthy();
-    expect(cadenceBanner?.textContent).toContain('Especialidad en Ortodoncia');
-    const equalizerBars = compiled.querySelectorAll('.eq-bar');
-    expect(equalizerBars.length).toBeGreaterThanOrEqual(5);
-    const archwireNodes = compiled.querySelectorAll('[data-testid="archwire-bracket-node"]');
-    expect(archwireNodes.length).toBeGreaterThan(0);
-  });
-
-  it('should toggle musical rhythm animation state (play/pause) with accessible aria-pressed', () => {
-    const compiled = fixture.nativeElement as HTMLElement;
-    const toggleBtn = compiled.querySelector('[data-testid="rhythm-toggle-btn"]') as HTMLButtonElement;
-    expect(toggleBtn).toBeTruthy();
-    expect(component.isRhythmPlaying).toBe(true);
-    expect(toggleBtn.getAttribute('aria-pressed')).toBe('true');
-
-    toggleBtn.click();
-    fixture.detectChanges();
-
-    expect(component.isRhythmPlaying).toBe(false);
-    expect(toggleBtn.getAttribute('aria-pressed')).toBe('false');
-  });
-
-  it('should switch musical preset and update BPM cadence and orthodontic phase description', () => {
-    expect(component.selectedPreset.id).toBe('bossa');
-    component.selectPreset('jazz');
-    fixture.detectChanges();
-
-    expect(component.selectedPreset.id).toBe('jazz');
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('[data-testid="ortho-harmonic-banner"]')?.textContent).toContain('Jazz');
-  });
-
   it('should detect orthodontic treatments and generate bracket nodes for multi-session progress', () => {
     expect(component.isOrthodonticTreatment('Ortodoncia Correctiva')).toBe(true);
     expect(component.isOrthodonticTreatment('Endodoncia Molar')).toBe(false);

@@ -18,14 +18,6 @@ interface AttentionItem {
   treatmentId?: string;
 }
 
-export interface MusicalPreset {
-  id: 'bossa' | 'jazz' | 'classical';
-  label: string;
-  bpm: number;
-  tempoLabel: string;
-  orthoPhaseNote: string;
-  barDurations: string[];
-}
 
 export interface BracketStep {
   index: number;
@@ -48,46 +40,6 @@ export class AttentionComponent implements OnInit {
   isLoading = true;
   actionFeedback: string | null = null;
 
-  isRhythmPlaying = true;
-
-  musicalPresets: MusicalPreset[] = [
-    {
-      id: 'bossa',
-      label: 'Bossa Clínica',
-      bpm: 76,
-      tempoLabel: 'Andante Armónico',
-      orthoPhaseNote: 'Ideal para ajuste fino de arcos NiTi y control de ligaduras sin estrés.',
-      barDurations: ['1.1s', '0.85s', '1.25s', '0.95s', '1.15s', '0.8s', '1.05s', '0.9s']
-    },
-    {
-      id: 'jazz',
-      label: 'Acoustic Jazz',
-      bpm: 92,
-      tempoLabel: 'Moderato Fluido',
-      orthoPhaseNote: 'Cadencia ágil para recambio de módulos elásticos y seguimiento de alineadores.',
-      barDurations: ['0.75s', '0.6s', '0.9s', '0.65s', '0.8s', '0.58s', '0.72s', '0.68s']
-    },
-    {
-      id: 'classical',
-      label: 'Piano Sereno',
-      bpm: 64,
-      tempoLabel: 'Adagio Preciso',
-      orthoPhaseNote: 'Concentración profunda para cementado directo de brackets y detallado oclusal.',
-      barDurations: ['1.45s', '1.15s', '1.6s', '1.25s', '1.5s', '1.1s', '1.35s', '1.2s']
-    }
-  ];
-
-  selectedPreset: MusicalPreset = this.musicalPresets[0];
-
-  archwireNodes = [
-    { cx: 28, cy: 48, label: 'Molar 16' },
-    { cx: 68, cy: 32, label: 'Premolar 14' },
-    { cx: 112, cy: 21, label: 'Canino 13' },
-    { cx: 160, cy: 16, label: 'Incisivo Central' },
-    { cx: 208, cy: 21, label: 'Canino 23' },
-    { cx: 252, cy: 32, label: 'Premolar 24' },
-    { cx: 292, cy: 48, label: 'Molar 26' }
-  ];
 
   counts = {
     total: 0,
@@ -103,19 +55,6 @@ export class AttentionComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadDashboardData();
-  }
-
-  toggleRhythm(): void {
-    this.isRhythmPlaying = !this.isRhythmPlaying;
-    this.cdr.detectChanges();
-  }
-
-  selectPreset(presetId: 'bossa' | 'jazz' | 'classical'): void {
-    const found = this.musicalPresets.find(p => p.id === presetId);
-    if (found) {
-      this.selectedPreset = found;
-      this.cdr.detectChanges();
-    }
   }
 
   isOrthodonticTreatment(name?: string): boolean {
@@ -135,18 +74,6 @@ export class AttentionComponent implements OnInit {
         current: stepNumber === current + 1
       };
     });
-  }
-
-  getOrthodonticHarmonicSummary(): { activeOrthoCount: number; onBeatPercent: number } {
-    const orthoTreatments = this.treatments.filter(t => this.isOrthodonticTreatment(t?.treatmentType?.name));
-    if (orthoTreatments.length === 0) {
-      return { activeOrthoCount: 1, onBeatPercent: 100 };
-    }
-    const scheduledCount = orthoTreatments.filter(t => t.appointments && t.appointments.length > 0).length;
-    return {
-      activeOrthoCount: orthoTreatments.length,
-      onBeatPercent: Math.round((scheduledCount / orthoTreatments.length) * 100)
-    };
   }
 
   loadDashboardData(): void {
