@@ -15,6 +15,7 @@ export class MetricsComponent implements OnInit {
   stats = {
     noShowRate: '0.0',
     confirmationRate: '0.0',
+    attendanceRate: '—',
     activeTreatmentsCount: 0,
     atRiskTreatmentsCount: 0,
     totalAppointments: 0,
@@ -43,13 +44,20 @@ export class MetricsComponent implements OnInit {
       next: ({ appts, treatments, attention }) => {
         const total = appts.length;
         const noShows = appts.filter((a: any) => a.status === 'NO_SHOW').length;
+        const completed = appts.filter((a: any) => a.status === 'COMPLETED').length;
         const confirmedOrCompleted = appts.filter((a: any) => a.status === 'CONFIRMED' || a.status === 'COMPLETED').length;
         const activeTr = treatments.filter((t: any) => t.status === 'ACTIVE').length;
         const missingAppt = attention.filter((i: any) => i.reason === 'MISSING_APPOINTMENT').length;
 
+        const attendanceRate = this.apiService.getAttendanceMetric({
+          completed,
+          noShow: noShows
+        });
+
         this.stats = {
           noShowRate: total > 0 ? ((noShows / total) * 100).toFixed(1) : '0.0',
           confirmationRate: total > 0 ? ((confirmedOrCompleted / total) * 100).toFixed(1) : '0.0',
+          attendanceRate: attendanceRate === null ? '—' : `${attendanceRate}%`,
           activeTreatmentsCount: activeTr,
           atRiskTreatmentsCount: missingAppt,
           totalAppointments: total,

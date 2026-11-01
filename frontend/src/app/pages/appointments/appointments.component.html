@@ -13,6 +13,56 @@
     </button>
   </div>
 
+  <div *ngIf="!isLoading" class="data-card p-5 flex flex-wrap items-center gap-x-8 gap-y-3">
+    <div>
+      <p class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Tasa de Asistencia (asistió/completado vs. no se presentó)</p>
+      <p class="text-3xl font-bold text-emerald-600 mt-1">{{ attendanceRate }}</p>
+    </div>
+    <div class="text-xs text-slate-600 space-y-1">
+      <p><span class="font-bold text-cyan-800">{{ attendanceCompleted }}</span> asistieron / completaron</p>
+      <p><span class="font-bold text-red-600">{{ attendanceNoShow }}</span> no se presentaron (ausentismo)</p>
+    </div>
+  </div>
+
+  <div class="data-card p-6">
+    <h3 class="text-xs font-bold text-slate-600 uppercase tracking-wider mb-4">Agendar Nueva Cita</h3>
+    <div *ngIf="formError" role="alert" class="mb-4 bg-red-50 text-red-800 border border-red-300 px-4 py-3 rounded-xl text-sm font-bold">
+      {{ formError }}
+    </div>
+    <form (ngSubmit)="submitRegistration()" class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+      <div class="md:col-span-4">
+        <label for="apptPatient" class="block text-xs font-bold text-slate-700 mb-1.5">Paciente (requerido)</label>
+        <select id="apptPatient" [(ngModel)]="form.patientId" name="patientId" required
+                class="w-full bg-white border border-slate-300 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-cyan-600 focus:border-cyan-600">
+          <option [ngValue]="''" disabled>Seleccionar paciente...</option>
+          <option *ngFor="let p of patients" [ngValue]="p.id">{{ p.name }}</option>
+        </select>
+      </div>
+      <div class="md:col-span-3">
+        <label for="apptDate" class="block text-xs font-bold text-slate-700 mb-1.5">Fecha y hora (requerido)</label>
+        <input id="apptDate" [(ngModel)]="form.date" name="date" type="datetime-local" required
+               class="w-full bg-white border border-slate-300 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-cyan-600 focus:border-cyan-600">
+      </div>
+      <div class="md:col-span-3">
+        <label for="apptTreatment" class="block text-xs font-bold text-slate-700 mb-1.5">Tratamiento (requerido)</label>
+        <select id="apptTreatment" [(ngModel)]="form.treatment" name="treatment" required
+                [disabled]="!form.patientId"
+                class="w-full bg-white border border-slate-300 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-cyan-600 focus:border-cyan-600 disabled:bg-slate-100 disabled:text-slate-400">
+          <option value="" disabled>Seleccionar tratamiento...</option>
+          <option *ngFor="let opt of treatmentOptions" [ngValue]="opt.kind === 'patientTreatment' ? opt.patientTreatmentId : opt.treatmentTypeId">{{ opt.label }}</option>
+        </select>
+        <p *ngIf="form.patientId && treatmentOptions.length === 0" class="text-[11px] text-slate-500 mt-1">
+          Este paciente no tiene tratamientos activos aún: los tipos disponibles aparecen al seleccionarlo.
+        </p>
+      </div>
+      <div class="md:col-span-2">
+        <button type="submit" class="btn-primary w-full py-2.5">
+          <span>Agendar</span>
+        </button>
+      </div>
+    </form>
+  </div>
+
   <div *ngIf="statusMessage" role="status" class="bg-emerald-900 text-white px-4 py-3 rounded-xl text-sm font-bold flex items-center gap-2">
     <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>

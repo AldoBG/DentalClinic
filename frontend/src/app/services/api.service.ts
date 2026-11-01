@@ -28,8 +28,17 @@ export class ApiService {
     return this.http.get<any[]>(this.baseUrl + '/appointments').pipe(catchError(this.handleError));
   }
 
-  createAppointment(data: { patientId: string; date: string; patientTreatmentId?: string }): Observable<any> {
+  createAppointment(data: { patientId: string; date: string; treatmentTypeId?: string; patientTreatmentId?: string }): Observable<any> {
     return this.http.post<any>(this.baseUrl + '/appointments', data).pipe(catchError(this.handleError));
+  }
+
+  getTreatmentTypes(): Observable<any[]> {
+    return this.http.get<any[]>(this.baseUrl + '/treatment-types').pipe(catchError(this.handleError));
+  }
+
+  getAttendanceMetric(data: { completed: number; noShow: number }): any {
+    const total = data.completed + data.noShow;
+    return total > 0 ? Math.round((data.completed / total) * 1000) / 10 : null;
   }
 
   updateAppointmentStatus(id: string, status: string): Observable<any> {
