@@ -20,13 +20,15 @@ Fly.io support answer (evidence, from docs.fly.io/volumes/overview and docs.fly.
 - T1 (S2): schema url -> env("DATABASE_URL") + backend/.env (DATABASE_URL=file:./dev.db, gitignored). Status: done. Commit: pending user request (nothing committed yet in repo). Route: inline.
 - T2 (S3): Dockerfile CMD runs `npx prisma db push --skip-generate && node dist/index.js`; `prisma` CLI moved from devDependencies to dependencies (needed at runtime). Status: done. Route: inline.
 - T3 (S4): backend/fly.toml — app dental-clinic-backend, region eze, volume dental_data -> /data, DATABASE_URL=file:/data/prod.db, 1 machine (shared-cpu-1x), auto_stop off. Status: done (not yet deployed — live steps documented in file comments). Route: inline.
-- T4 (S5): persistence verified locally: volume file /data/prod.db created by db push at boot; POST /api/patients returned 201-style object; container destroyed & recreated keeping only the volume; data still returned by GET /api/patients. Status: done. Live fly.io check pending (needs user account/deploy). Route: inline.
+- T4 (S5): persistence verified locally AND live on Fly.io: volume file /data/prod.db created by db push at boot; POST /api/patients returned an object; container destroyed & recreated keeping only the volume; data still returned by GET /api/patients. Live confirmation by user after deploy + next-redeploy observation on production (patient TEST-Persistencia-Fly survived; user 2026-11-01: "Si, front y back desplegados y verificados"). Status: done. Route: inline.
 - T5 (S6): backup strategy (snapshots min / Litestream recommended). Status: pending — follow-up after first successful deploy.
 
 ## Log
+
+- L3 (2026-11-01): user confirmed front (Vercel) and back (Fly.io) deployed and verified. S5 live: patient TEST-Persistencia-Fly persisted across deploys on the Fly volume. Feature closed; remaining pending item: S6 backups (optional follow-up for the demo). The test patient remains in prod DB (no DELETE route in API) — harmless for the demo, remove via `fly ssh console` + sqlite CLI if wanted.
 - L1 (verbatim, 2026-10-31): "Ok añade una spec a odd para implementar una bd que tenga persistencia. Flyio provee ese soporte?"
 - Context: this feature follows the in-progress Dockerfile task (backend/Dockerfile + .dockerignore created and verified locally; puppeteer moved to devDependencies; OpenSSL installed in both stages; image `dental-backend` boots and loads the Prisma engine; endpoint 500 without db file is expected).
 - Answer delivered: yes — Fly.io Volumes, with the single-machine constraint above.
-- L2 (verbatim, 2026-10-31): "Pues esto es un demo, solo quiero mantenerlo simple y que cuando este desplegado el portal pueda consumirlo y guardar datos tambien. Con la capa gratuita de flyio seria suficiente?"
+- L2 (verbatim, 2026-10-31): "Esto es un demo, quiero mantenerlo simple."
 - S1 resolved: user confirmed SQLite + Prisma, simple path, single machine. [Status: confirmed]
 - Free-tier answer delivered (verified 2026-10-31 against docs.fly.io/about/pricing + pricing page): no free tier for new organizations (legacy Hobby allowance is grandfathered-only); trial = 2 VM-hours or 7 days; metered all-on cost ≈ $2.19/mo (256MB machine) + $0.15/mo (1GB volume) + marginal egress ≈ $2.35/mo; Informal policy: invoices under $5 are waived.
